@@ -1,53 +1,38 @@
-# mypy: disable-error-code="no-untyped-call, misc"
+# deploy.py
+from algosdk.v2client import algod
+from smart_contracts.contract.contract import GigDAOContract
 
+def deploy():
+    # Sử dụng Algonode.io cho testnet
+    algod_address = "https://testnet-api.4160.nodely.dev/"
+    algod_token = ""  # Algonode không yêu cầu token
+    
+    try:
+        # Khởi tạo Algod client
+        algod_client = algod.AlgodClient(algod_token, algod_address)
 
-import logging
-from collections.abc import Callable
-from pathlib import Path
+        # Kiểm tra kết nối
+        status = algod_client.status()
+        print(f"Kết nối thành công. Phiên bản node: {status['last-round']}")
 
-from algokit_utils import (
-    Account,
-    ApplicationSpecification,
-    EnsureBalanceParameters,
-    ensure_funded,
-    get_account,
-    get_algod_client,
-    get_indexer_client,
-)
-from algosdk.util import algos_to_microalgos
-from algosdk.v2client.algod import AlgodClient
-from algosdk.v2client.indexer import IndexerClient
+        # Lưu ý: Bạn cần cung cấp địa chỉ và private key của người triển khai
+        # Thay thế các giá trị dưới đây bằng địa chỉ và private key thực tế
+        address = "MV7HWZVFW64CK2A5JCUEXXWORNZRIRQLPPNAUPO4IP4AHMZ7XB6BU2ZSNM"
+        private_key = "tree river prefer carry lift together charge priority cloud oxygen model twin hockey citizen deputy baby flip security bullet dry seat concert special about pride"
 
-logger = logging.getLogger(__name__)
+        print(f"Địa chỉ người triển khai: {address}")
 
+        # Triển khai GigDAO Contract
+        gig_dao_contract = GigDAOContract(algod_client)
+        gig_dao_app_id = gig_dao_contract.create_gig_dao(address, private_key)
+        print(f"GigDAO Contract đã được triển khai với app_id: {gig_dao_app_id}")
 
-def deploy(
-    app_spec_path: Path,
-    deploy_callback: Callable[
-        [AlgodClient, IndexerClient, ApplicationSpecification, Account], None
-    ],
-    deployer_initial_funds: int = 2,
-) -> None:
-    # get clients
-    # by default client configuration is loaded from environment variables
-    algod_client = get_algod_client()
-    indexer_client = get_indexer_client()
+        print("Tất cả các contract đã được triển khai thành công!")
 
-    # get app spec
-    app_spec = ApplicationSpecification.from_json(app_spec_path.read_text())
+    except Exception as e:
+        print(f"Lỗi khi triển khai: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
 
-    # get deployer account by name
-    deployer = get_account(algod_client, "DEPLOYER", fund_with_algos=0)
-
-    minimum_funds_micro_algos = algos_to_microalgos(deployer_initial_funds)
-    ensure_funded(
-        algod_client,
-        EnsureBalanceParameters(
-            account_to_fund=deployer,
-            min_spending_balance_micro_algos=minimum_funds_micro_algos,
-            min_funding_increment_micro_algos=minimum_funds_micro_algos,
-        ),
-    )
-
-    # use provided callback to deploy the app
-    deploy_callback(algod_client, indexer_client, app_spec, deployer)
+if __name__ == "__main__":
+    deploy()

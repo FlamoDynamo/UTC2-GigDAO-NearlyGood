@@ -1,22 +1,17 @@
 import logging
-
 import algokit_utils
 from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 
 logger = logging.getLogger(__name__)
 
-
-# define deployment behaviour based on supplied app spec
+# Define deployment behavior based on supplied app spec
 def deploy(
     algod_client: AlgodClient,
     indexer_client: IndexerClient,
     app_spec: algokit_utils.ApplicationSpecification,
     deployer: algokit_utils.Account,
 ) -> None:
-    from smart_contracts.artifacts.contract.contract_client import (
-        ContractClient,
-    )
 
     app_client = ContractClient(
         algod_client,
@@ -34,3 +29,9 @@ def deploy(
         f"Called hello on {app_spec.contract.name} ({app_client.app_id}) "
         f"with name={name}, received: {response.return_value}"
     )
+
+# Load or define your app specification here
+app_spec = algokit_utils.load_app_spec("smart_contracts/specifications/spec.yaml")  # Cập nhật đường dẫn đến file spec của bạn
+
+# Load or define your deployer account here
+deployer = algokit_utils.load_account("smart_contracts/specifications/account.json")  # Cập nhật đường dẫn đến file account của bạn

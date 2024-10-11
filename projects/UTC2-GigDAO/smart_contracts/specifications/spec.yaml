@@ -1,0 +1,14 @@
+# spec.yaml
+name: UTC2-GigDAO
+version: 1.0.0
+description: A decentralized autonomous organization for gig economy.
+contract:
+  type: smart_contract
+  source: smart_contracts/contract/smart_contract.teal  # Đường dẫn đến file TEAL của hợp đồng
+  approval_program:
+    source: approval.teal
+  clear_program:
+    source: clear.teal
+  schema:
+    num_uints: 1
+    num_byte_slices: 2
